@@ -12,11 +12,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 
 import com.aleksandr.birukov.weather.Fragments.ForecastFragment;
 import com.aleksandr.birukov.weather.Fragments.StatisticFragment;
-import com.google.android.gms.location.places.AutocompleteFilter;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.bumptech.glide.Glide;
 
 public class NavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -34,9 +35,15 @@ public class NavigationActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
+
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        View hView =  navigationView.getHeaderView(0);
+        ImageView imgview = hView.findViewById(R.id.imageView);
+        Glide.with(this).load("http://openweathermap.org/img/w/10d.png").into(imgview);
 
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.container, new ForecastFragment()).commit();
     }
 
     @Override

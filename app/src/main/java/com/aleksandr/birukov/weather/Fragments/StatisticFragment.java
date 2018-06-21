@@ -61,7 +61,7 @@ public class StatisticFragment extends Fragment {
 
         db = WeatherApplication.getInstance().getDatabase();
         mWeatherForecast = new WeatherForecast(Converter.convertFromDB(db.getAll()));
-        format = new SimpleDateFormat("d.MM");
+        format = new SimpleDateFormat("d.MM H:mm");
 
 
         btn = v.findViewById(R.id.btn_date);
@@ -76,45 +76,10 @@ public class StatisticFragment extends Fragment {
             }
         });
 
-
-
         anyChartView = v.findViewById(R.id.any_chart_view);
-
-
-        return v;
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        start = (Date) data.getExtras().get(Constants.KEY_DIALOG_RESULT_START);
-        end = (Date) data.getExtras().get(Constants.KEY_DIALOG_RESULT_END);
-        if(end == null){
-            log("end = null");
-        }
-        if(start == null){
-            log("start = null");
-        }
-        tv.setText(format.format(start) + " - " + format.format(end));
-
-        updateGraph();
-    }
-
-    public void updateGraph(){
-        List<Weather> data = mWeatherForecast.getWeeklyForcast();
-        ArrayList<String> dates = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        Calendar cal_end = Calendar.getInstance();
-        log("1");
-        calendar.setTime(start);
-        cal_end.setTime(end);
-
-        while(calendar.get(Calendar.DAY_OF_MONTH) <= cal_end.get(Calendar.DAY_OF_MONTH)){
-            dates.add(format.format(calendar.getTime()));
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-        }
         /*Cartesian cartesian = AnyChart.line();
+
+        List<Weather> data = mWeatherForecast.getWeeklyForcast();
 
         cartesian.setAnimation(true);
         cartesian.setPadding(10d, 20d, 5d, 20d);
@@ -128,10 +93,12 @@ public class StatisticFragment extends Fragment {
 
         List<DataEntry> seriesData = new ArrayList<>();
         for (Weather w : data){
-            if(w.getTime() >= start.getTime() && w.getTime() <= end.getTime()) {
+            if(w.getTime()*1000 >= 1529580279844l && w.getTime()*1000 <= 1530013278544l) {
+                log("+");
                 seriesData.add(new CustomDataEntry(format.format(w.getDate().getTime()), w.getTemperature()));
             }
         }
+        //3246 3541 2816 2092
         log("3");
         Set set = new Set(seriesData);
         Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
@@ -145,9 +112,7 @@ public class StatisticFragment extends Fragment {
         cartesian.getLegend().setPadding(0d, 0d, 10d, 0d);
         log("4");
         anyChartView.setChart(cartesian);
-*/
-
-        Cartesian cartesian = AnyChart.line();
+        /*Cartesian cartesian = AnyChart.line();
 
         cartesian.setAnimation(true);
 
@@ -169,27 +134,6 @@ public class StatisticFragment extends Fragment {
         seriesData.add(new CustomDataEntry("1986", 3.6, 2.3, 2.8));
         seriesData.add(new CustomDataEntry("1987", 7.1, 4.0, 4.1));
         seriesData.add(new CustomDataEntry("1988", 8.5, 6.2, 5.1));
-        seriesData.add(new CustomDataEntry("1989", 9.2, 11.8, 6.5));
-        seriesData.add(new CustomDataEntry("1990", 10.1, 13.0, 12.5));
-        seriesData.add(new CustomDataEntry("1991", 11.6, 13.9, 18.0));
-        seriesData.add(new CustomDataEntry("1992", 16.4, 18.0, 21.0));
-        seriesData.add(new CustomDataEntry("1993", 18.0, 23.3, 20.3));
-        seriesData.add(new CustomDataEntry("1994", 13.2, 24.7, 19.2));
-        seriesData.add(new CustomDataEntry("1995", 12.0, 18.0, 14.4));
-        seriesData.add(new CustomDataEntry("1996", 3.2, 15.1, 9.2));
-        seriesData.add(new CustomDataEntry("1997", 4.1, 11.3, 5.9));
-        seriesData.add(new CustomDataEntry("1998", 6.3, 14.2, 5.2));
-        seriesData.add(new CustomDataEntry("1999", 9.4, 13.7, 4.7));
-        seriesData.add(new CustomDataEntry("2000", 11.5, 9.9, 4.2));
-        seriesData.add(new CustomDataEntry("2001", 13.5, 12.1, 1.2));
-        seriesData.add(new CustomDataEntry("2002", 14.8, 13.5, 5.4));
-        seriesData.add(new CustomDataEntry("2003", 16.6, 15.1, 6.3));
-        seriesData.add(new CustomDataEntry("2004", 18.1, 17.9, 8.9));
-        seriesData.add(new CustomDataEntry("2005", 17.0, 18.9, 10.1));
-        seriesData.add(new CustomDataEntry("2006", 16.6, 20.3, 11.5));
-        seriesData.add(new CustomDataEntry("2007", 14.1, 20.7, 12.2));
-        seriesData.add(new CustomDataEntry("2008", 15.7, 21.6, 10));
-        seriesData.add(new CustomDataEntry("2009", 12.0, 22.5, 8.9));
 
         Set set = new Set(seriesData);
         Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
@@ -236,19 +180,77 @@ public class StatisticFragment extends Fragment {
         cartesian.getLegend().setFontSize(13d);
         cartesian.getLegend().setPadding(0d, 0d, 10d, 0d);
 
+        anyChartView.setChart(cartesian);*/
+        return v;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        start = (Date) data.getExtras().get(Constants.KEY_DIALOG_RESULT_START);
+        end = (Date) data.getExtras().get(Constants.KEY_DIALOG_RESULT_END);
+        if(end == null){
+            log("end = null");
+        }
+        if(start == null){
+            log("start = null");
+        }
+        tv.setText(format.format(start) + " - " + format.format(end));
+
+        updateGraph();
+    }
+
+    public void updateGraph(){
+        List<Weather> data = mWeatherForecast.getForecast();
+        ArrayList<String> dates = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
+        Calendar cal_end = Calendar.getInstance();
+
+        calendar.setTime(start);
+        cal_end.setTime(end);
+        log(String.valueOf(data.size()));
+        while(calendar.get(Calendar.DAY_OF_MONTH) <= cal_end.get(Calendar.DAY_OF_MONTH)){
+            dates.add(format.format(calendar.getTime()));
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        Cartesian cartesian = AnyChart.line();
+
+        cartesian.setAnimation(true);
+        //cartesian.setPadding(10d, 20d, 5d, 20d);
+
+        cartesian.getCrosshair().setEnabled(true);
+        cartesian.getCrosshair()
+                .setYLabel(true)
+                .setYStroke((Stroke) null, null, null, null, null);
+
+        //cartesian.getYAxis().setTitle("Температура(\u00B0C)");
+        cartesian.getXAxis().getLabels().setPadding(5d, 5d, 20d, 5d);
+
+        cartesian.getXAxis().setStaggerLines(5);
+
+        List<DataEntry> seriesData = new ArrayList<>();
+        for (Weather w : data){
+            if(w.getTime()*1000 >= start.getTime() && w.getTime()*1000 <= end.getTime()) {
+                seriesData.add(new ValueDataEntry(
+                        format.format(w.getDate().getTime()), w.getTemperature()));
+            }
+        }
+        Set set = new Set(seriesData);
+        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
+        CartesianSeriesLine series1 = cartesian.line(series1Mapping);
+        series1.setName("Температура, \u00B0C");
+        cartesian.getLegend().setEnabled(true);
+        cartesian.getLegend().setFontSize(20d);
+        cartesian.getLegend().setPadding(0d, 0d, 10d, 0d);
+        //cartesian.setData(seriesData);
+
         anyChartView.setChart(cartesian);
+
+
     }
     public void log(String text){
         Log.e("MyLog", text);
     }
 
-    private class CustomDataEntry extends ValueDataEntry {
-
-        CustomDataEntry(String x, Number value, Number value2, Number value3) {
-            super(x, value);
-            setValue("value2", value2);
-            setValue("value3", value3);
-        }
-
-    }
 }

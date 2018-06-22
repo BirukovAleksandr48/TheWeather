@@ -7,6 +7,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Toast;
@@ -59,12 +60,14 @@ public class DateRangeFragment extends DialogFragment implements DialogInterface
 
                 Date start = result.get(0);
                 Date end = result.get(result.size()-1);
+                Calendar cal = Calendar.getInstance();
+                cal.setTime(end);
+                cal.add(Calendar.DAY_OF_MONTH, 1);
 
                 Intent intent = new Intent();
-                intent.putExtra(Constants.KEY_DIALOG_RESULT_START, start);
-                intent.putExtra(Constants.KEY_DIALOG_RESULT_END, end);
+                intent.putExtra(Constants.KEY_DIALOG_RESULT_START, start.getTime());
+                intent.putExtra(Constants.KEY_DIALOG_RESULT_END, cal.getTime().getTime());
                 getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
-                //dismiss();
         }
     }
 }

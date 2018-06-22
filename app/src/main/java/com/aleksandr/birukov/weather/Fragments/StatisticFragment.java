@@ -3,8 +3,10 @@ package com.aleksandr.birukov.weather.Fragments;
 
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,12 +50,15 @@ public class StatisticFragment extends Fragment {
     ImageButton btn;
     TextView tv;
     CalendarPickerView calendar;
-    DateFormat format;
+    DateFormat formatGraph, formatTextView;
     public static final int CODE_TIME_RANGE = 1;
     WeatherDao db;
     WeatherForecast mWeatherForecast;
-    Date start, end;
+    long start, end;
     AnyChartView anyChartView;
+    SharedPreferences.Editor spEditor;
+    SharedPreferences sharedPreferences;
+    String cityName;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -61,11 +66,12 @@ public class StatisticFragment extends Fragment {
 
         db = WeatherApplication.getInstance().getDatabase();
         mWeatherForecast = new WeatherForecast(Converter.convertFromDB(db.getAll()));
-        format = new SimpleDateFormat("d.MM H:mm");
-
+        formatGraph = new SimpleDateFormat("H:mm d.MM");
+        formatTextView = new SimpleDateFormat("d.MM");
 
         btn = v.findViewById(R.id.btn_date);
         tv = v.findViewById(R.id.tv_selected_date);
+        anyChartView = v.findViewById(R.id.any_chart_view);
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,112 +81,16 @@ public class StatisticFragment extends Fragment {
                 fragment.show(getFragmentManager(), fragment.getClass().getName());
             }
         });
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        spEditor = sharedPreferences.edit();
 
-        anyChartView = v.findViewById(R.id.any_chart_view);
-        /*Cartesian cartesian = AnyChart.line();
+        start = sharedPreferences.getLong(Constants.SP_KEY_DATE_START, 0);
+        end = sharedPreferences.getLong(Constants.SP_KEY_DATE_END, 0);
+        cityName = sharedPreferences.getString(Constants.SP_KEY_CITY_NAME, null);
 
-        List<Weather> data = mWeatherForecast.getWeeklyForcast();
-
-        cartesian.setAnimation(true);
-        cartesian.setPadding(10d, 20d, 5d, 20d);
-        log("2");
-        cartesian.getCrosshair().setEnabled(true);
-        cartesian.getCrosshair()
-                .setYLabel(true)
-                .setYStroke((Stroke) null, null, null, null, null);
-
-        cartesian.getYAxis().setTitle("Температура(\u00B0C)");
-
-        List<DataEntry> seriesData = new ArrayList<>();
-        for (Weather w : data){
-            if(w.getTime()*1000 >= 1529580279844l && w.getTime()*1000 <= 1530013278544l) {
-                log("+");
-                seriesData.add(new CustomDataEntry(format.format(w.getDate().getTime()), w.getTemperature()));
-            }
+        if(mWeatherForecast.getForecast().size() > 0 && start > 0 && end > 0 && cityName != null){
+             updateUI();
         }
-        //3246 3541 2816 2092
-        log("3");
-        Set set = new Set(seriesData);
-        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-
-        CartesianSeriesLine series1 = cartesian.line(series1Mapping);
-        series1.setName("Температура");
-
-
-        cartesian.getLegend().setEnabled(true);
-        cartesian.getLegend().setFontSize(20d);
-        cartesian.getLegend().setPadding(0d, 0d, 10d, 0d);
-        log("4");
-        anyChartView.setChart(cartesian);
-        /*Cartesian cartesian = AnyChart.line();
-
-        cartesian.setAnimation(true);
-
-        cartesian.setPadding(10d, 20d, 5d, 20d);
-
-        cartesian.getCrosshair().setEnabled(true);
-        cartesian.getCrosshair()
-                .setYLabel(true)
-                .setYStroke((Stroke) null, null, null, null, null);
-
-        cartesian.getTooltip().setPositionMode(TooltipPositionMode.POINT);
-
-        cartesian.setTitle("Trend of Sales of the Most Popular Products of ACME Corp.");
-
-        cartesian.getYAxis().setTitle("Number of Bottles Sold (thousands)");
-        cartesian.getXAxis().getLabels().setPadding(5d, 5d, 5d, 5d);
-
-        List<DataEntry> seriesData = new ArrayList<>();
-        seriesData.add(new CustomDataEntry("1986", 3.6, 2.3, 2.8));
-        seriesData.add(new CustomDataEntry("1987", 7.1, 4.0, 4.1));
-        seriesData.add(new CustomDataEntry("1988", 8.5, 6.2, 5.1));
-
-        Set set = new Set(seriesData);
-        Mapping series1Mapping = set.mapAs("{ x: 'x', value: 'value' }");
-        Mapping series2Mapping = set.mapAs("{ x: 'x', value: 'value2' }");
-        Mapping series3Mapping = set.mapAs("{ x: 'x', value: 'value3' }");
-
-        CartesianSeriesLine series1 = cartesian.line(series1Mapping);
-        series1.setName("Brandy");
-        series1.getHovered().getMarkers().setEnabled(true);
-        series1.getHovered().getMarkers()
-                .setType(MarkerType.CIRCLE)
-                .setSize(4d);
-        series1.getTooltip()
-                .setPosition("right")
-                .setAnchor(EnumsAnchor.LEFT_CENTER)
-                .setOffsetX(5d)
-                .setOffsetY(5d);
-
-        CartesianSeriesLine series2 = cartesian.line(series2Mapping);
-        series2.setName("Whiskey");
-        series2.getHovered().getMarkers().setEnabled(true);
-        series2.getHovered().getMarkers()
-                .setType(MarkerType.CIRCLE)
-                .setSize(4d);
-        series2.getTooltip()
-                .setPosition("right")
-                .setAnchor(EnumsAnchor.LEFT_CENTER)
-                .setOffsetX(5d)
-                .setOffsetY(5d);
-
-        CartesianSeriesLine series3 = cartesian.line(series3Mapping);
-        series3.setName("Tequila");
-        series3.getHovered().getMarkers().setEnabled(true);
-        series3.getHovered().getMarkers()
-                .setType(MarkerType.CIRCLE)
-                .setSize(4d);
-        series3.getTooltip()
-                .setPosition("right")
-                .setAnchor(EnumsAnchor.LEFT_CENTER)
-                .setOffsetX(5d)
-                .setOffsetY(5d);
-
-        cartesian.getLegend().setEnabled(true);
-        cartesian.getLegend().setFontSize(13d);
-        cartesian.getLegend().setPadding(0d, 0d, 10d, 0d);
-
-        anyChartView.setChart(cartesian);*/
         return v;
     }
 
@@ -188,52 +98,36 @@ public class StatisticFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        start = (Date) data.getExtras().get(Constants.KEY_DIALOG_RESULT_START);
-        end = (Date) data.getExtras().get(Constants.KEY_DIALOG_RESULT_END);
-        if(end == null){
-            log("end = null");
+        start = data.getExtras().getLong(Constants.KEY_DIALOG_RESULT_START);
+        end = data.getExtras().getLong(Constants.KEY_DIALOG_RESULT_END);
+        if(end > 0 && start > 0){
+            spEditor.putLong(Constants.SP_KEY_DATE_START, start);
+            spEditor.putLong(Constants.SP_KEY_DATE_END, end);
+            spEditor.commit();
         }
-        if(start == null){
-            log("start = null");
-        }
-        tv.setText(format.format(start) + " - " + format.format(end));
 
-        updateGraph();
+        updateUI();
     }
 
-    public void updateGraph(){
-        List<Weather> data = mWeatherForecast.getForecast();
-        ArrayList<String> dates = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
-        Calendar cal_end = Calendar.getInstance();
+    public void updateUI(){
+        tv.setText(cityName + "  " + formatTextView.format(new Date(start)) +
+                " - " + formatTextView.format(new Date(end)));
 
-        calendar.setTime(start);
-        cal_end.setTime(end);
-        log(String.valueOf(data.size()));
-        while(calendar.get(Calendar.DAY_OF_MONTH) <= cal_end.get(Calendar.DAY_OF_MONTH)){
-            dates.add(format.format(calendar.getTime()));
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-        }
+        List<Weather> data = mWeatherForecast.getForecast();
+
         Cartesian cartesian = AnyChart.line();
 
         cartesian.setAnimation(true);
-        //cartesian.setPadding(10d, 20d, 5d, 20d);
-
         cartesian.getCrosshair().setEnabled(true);
         cartesian.getCrosshair()
                 .setYLabel(true)
                 .setYStroke((Stroke) null, null, null, null, null);
-
-        //cartesian.getYAxis().setTitle("Температура(\u00B0C)");
         cartesian.getXAxis().getLabels().setPadding(5d, 5d, 20d, 5d);
-
-        cartesian.getXAxis().setStaggerLines(5);
 
         List<DataEntry> seriesData = new ArrayList<>();
         for (Weather w : data){
-            if(w.getTime()*1000 >= start.getTime() && w.getTime()*1000 <= end.getTime()) {
-                seriesData.add(new ValueDataEntry(
-                        format.format(w.getDate().getTime()), w.getTemperature()));
+            if(w.getTime()*1000 >= start && w.getTime()*1000 < end) {
+                seriesData.add(new ValueDataEntry(formatGraph.format(w.getDate().getTime()), w.getTemperature()));
             }
         }
         Set set = new Set(seriesData);
@@ -243,12 +137,9 @@ public class StatisticFragment extends Fragment {
         cartesian.getLegend().setEnabled(true);
         cartesian.getLegend().setFontSize(20d);
         cartesian.getLegend().setPadding(0d, 0d, 10d, 0d);
-        //cartesian.setData(seriesData);
-
         anyChartView.setChart(cartesian);
-
-
     }
+
     public void log(String text){
         Log.e("MyLog", text);
     }

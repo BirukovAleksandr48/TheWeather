@@ -1,6 +1,7 @@
 package com.aleksandr.birukov.weather.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,6 +63,12 @@ public class WeatherAdapterDaily extends BaseAdapter {
         tvHum.setText(dayWeather.getHumidityStr());
         Glide.with(mContext).load(dayWeather.getIconUrl()).into(ivIcon);
 
+        if(position % 2 == 1) {
+            tvDate.setBackgroundColor(Color.parseColor("#FF97AFF5"));
+            tvTemp.setBackgroundColor(Color.parseColor("#FF97AFF5"));
+            tvHum.setBackgroundColor(Color.parseColor("#FF97AFF5"));
+            ivIcon.setBackgroundColor(Color.parseColor("#FF97AFF5"));
+        }
         return view;
     }
 }

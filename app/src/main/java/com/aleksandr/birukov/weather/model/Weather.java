@@ -2,12 +2,17 @@ package com.aleksandr.birukov.weather.model;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 public class Weather  {
@@ -69,5 +74,6 @@ public class Weather  {
     public long getTime(){
         return time;
     }
+
 
 }

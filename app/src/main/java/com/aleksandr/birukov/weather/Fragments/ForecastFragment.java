@@ -60,7 +60,6 @@ public class ForecastFragment extends Fragment {
     double lon=0, lat=0;
     String cityName;
     final int PLACE_PICKER_REQUEST = 1;
-    String lastUpdateTime;
     String units = "metric";
     String key = WeatherApi.KEY;
     WeatherForecast mWeatherForecast;
@@ -72,6 +71,7 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_forecast, container, false);
+
         api = WeatherApi.getInstance().create(WeatherApi.ApiInterface.class);
         db = WeatherApplication.getInstance().getDatabase();
 
@@ -116,19 +116,19 @@ public class ForecastFragment extends Fragment {
         gvForecastWeek.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                tvCurDay.setText(new SimpleDateFormat("EEEE").format(mWeatherForecast.getDailyForcast(position).get(0).getDate().getTime()));
+                tvCurDay.setText(new SimpleDateFormat("EEEE, d.MM").format(mWeatherForecast.getDailyForcast(position).get(0).getDate().getTime()));
                 gvForecastDay.setAdapter(new WeatherAdapterDaily(
                         getActivity(), mWeatherForecast.getDailyForcast(position)));
             }
         });
 
-        sharedPreferences = getActivity().getPreferences(getActivity().MODE_PRIVATE);
+        //sharedPreferences = getActivity().getPreferences(getActivity().MODE_PRIVATE);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         spEditor = sharedPreferences.edit();
 
         cityName = sharedPreferences.getString(Constants.SP_KEY_CITY_NAME, null);
-        lat = sharedPreferences.getFloat(Constants.SP_KEY_CITY_LAT, 0);
-        lon = sharedPreferences.getFloat(Constants.SP_KEY_CITY_LON, 0);
-        lastUpdateTime = sharedPreferences.getString(Constants.SP_KEY_DATE_UPDATE, null);
+        lat = Double.longBitsToDouble(sharedPreferences.getLong(Constants.SP_KEY_CITY_LAT, 0));
+        lon = Double.longBitsToDouble(sharedPreferences.getLong(Constants.SP_KEY_CITY_LON, 0));
 
         if(cityName != null)
             autocompleteFragment.setText(cityName);
@@ -136,7 +136,7 @@ public class ForecastFragment extends Fragment {
         mWeatherForecast = new WeatherForecast(Converter.convertFromDB(db.getAll()));
         if (mWeatherForecast.getForecast().size()>0)
             updateUI();
-//тут нужно обновить прогноз
+
         return v;
     }
 
@@ -146,6 +146,7 @@ public class ForecastFragment extends Fragment {
                 if (resultCode != getActivity().RESULT_OK)
                     return;
 
+                tvCurDay.setText("");
                 Place place = PlacePicker.getPlace(getActivity(), data);
                 updatePlace(place);
                 updateWeather();
@@ -178,13 +179,12 @@ public class ForecastFragment extends Fragment {
             db.insert(w);
         }
 
-        lastUpdateTime = new SimpleDateFormat("H:mm dd.MM")
-                .format(Calendar.getInstance().getTime());
+        log(String.valueOf(lat));
+        log(String.valueOf(lon));
 
         spEditor.putString(Constants.SP_KEY_CITY_NAME, cityName)
-                .putFloat(Constants.SP_KEY_CITY_LAT, Double.doubleToRawLongBits(lat))
-                .putFloat(Constants.SP_KEY_CITY_LON, Double.doubleToRawLongBits(lon))
-                .putString(Constants.SP_KEY_DATE_UPDATE, lastUpdateTime)
+                .putLong(Constants.SP_KEY_CITY_LAT, Double.doubleToRawLongBits(lat))
+                .putLong(Constants.SP_KEY_CITY_LON, Double.doubleToRawLongBits(lon))
                 .commit();
     }
 
@@ -199,14 +199,18 @@ public class ForecastFragment extends Fragment {
         Geocoder gcd = new Geocoder(getActivity(), Locale.getDefault());
         List<Address> addresses = null;
         try {
+            Log.e("MyLog", "1");
             addresses = gcd.getFromLocation(lat, lon, 1);
             if (addresses.size() > 0) {
-                cityName = addresses.get(0).getLocality();
-                autocompleteFragment.setText(cityName);
+                Log.e("MyLog", "2");
+                cityName =  addresses.get(0).getLocality();
             }
         } catch (IOException e) {
+            Log.e("MyLog", "3");
             e.printStackTrace();
         }
+        Log.e("MyLog", "4");
+        //cityName = WeatherApplication.getCityName(getActivity(), lat, lon);
     }
     public void log(String text){
         Log.e("MyLog", text);

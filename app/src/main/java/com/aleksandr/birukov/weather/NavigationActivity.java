@@ -2,6 +2,8 @@ package com.aleksandr.birukov.weather;
 
 import android.app.Fragment;
 import android.app.FragmentManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -18,6 +20,10 @@ import android.widget.ImageView;
 import com.aleksandr.birukov.weather.Fragments.ForecastFragment;
 import com.aleksandr.birukov.weather.Fragments.StatisticFragment;
 import com.bumptech.glide.Glide;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 public class NavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -38,12 +44,14 @@ public class NavigationActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        View hView =  navigationView.getHeaderView(0);
-        ImageView imgview = hView.findViewById(R.id.imageView);
-        Glide.with(this).load("http://openweathermap.org/img/w/10d.png").into(imgview);
+        navigationView.getMenu().getItem(0).setChecked(true);
 
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.container, new ForecastFragment()).commit();
+
+        WeatherService.setServiceAlarm(this, true);
+
+
     }
 
     @Override
@@ -54,23 +62,6 @@ public class NavigationActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.weather, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -97,6 +88,9 @@ public class NavigationActivity extends AppCompatActivity
             fragmentManager.beginTransaction().replace(R.id.container, fragment).commit();
 
         }
+
+        item.setChecked(true);
+        setTitle(item.getTitle());
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);

@@ -12,6 +12,7 @@ import retrofit2.http.Query;
 public class WeatherApi {
     public static final String KEY = "2e08a380cc5fbd2f58af47783f3a8562";
     public static final String BASE_URL = "http://api.openweathermap.org/data/2.5/";
+    public static final String UNITS = "metric";
     private static Retrofit retrofit;
 
     private WeatherApi(){}

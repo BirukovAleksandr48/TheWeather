@@ -24,18 +24,20 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// Сервис, который отвечает за создание уведомлений
 public class WeatherService extends IntentService{
-    private static final int INTERVAL = 1000 * 60; // 60 секунд
+    private static final int INTERVAL = 1000 * 60;
     WeatherApi.ApiInterface api;
     double lat, lon;
 
     public static Intent newIntent(Context context){
         return new Intent(context, WeatherService.class);
     }
+
     public WeatherService() {
         super("weather");
-
     }
+
     public WeatherService(String name) {
         super(name);
     }
@@ -47,8 +49,6 @@ public class WeatherService extends IntentService{
         }
         api = WeatherApi.getInstance().create(WeatherApi.ApiInterface.class);
         updateWeather();
-
-
     }
 
     private boolean isNetworkAvailableAndConnected() {
@@ -60,6 +60,7 @@ public class WeatherService extends IntentService{
         return isNetworkConnected;
     }
 
+    // включает/выключает таймер вызова сервиса
     public static void setServiceAlarm(Context context, boolean isOn) {
         Intent i = WeatherService.newIntent(context);
         PendingIntent pi = PendingIntent.getService(context, 0, i, 0);
@@ -73,20 +74,26 @@ public class WeatherService extends IntentService{
             pi.cancel();
         }
     }
+
+    // проверяет включен ли таймер вызова сервиса
     public static boolean isServiceAlarmOn(Context context) {
         Intent i = WeatherService.newIntent(context);
         PendingIntent pi = PendingIntent
                 .getService(context, 0, i, PendingIntent.FLAG_NO_CREATE);
         return pi != null;
     }
+
+    // достает координаты и находит по ним текущую погоду
     public void updateWeather(){
         SharedPreferences mSharPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         lat = Double.longBitsToDouble(mSharPref.getLong(Constants.SP_KEY_CITY_LAT, 0));
         lon = Double.longBitsToDouble(mSharPref.getLong(Constants.SP_KEY_CITY_LON, 0));
 
-        log(String.valueOf(lat));
-        log(String.valueOf(lon));
+        // если координаты равны 0, то пользователь еще не выбирал город и сервис прекращает работу
+        if(lat == lon && lon == 0){
+            return;
+        }
 
         Call<Weather> callForecast = api.getToday(lat, lon, WeatherApi.UNITS, WeatherApi.KEY);
         callForecast.enqueue(new Callback<Weather>() {

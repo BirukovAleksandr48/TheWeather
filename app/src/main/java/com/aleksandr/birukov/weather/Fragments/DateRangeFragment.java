@@ -24,7 +24,7 @@ import java.util.List;
 
 import es.dmoral.toasty.Toasty;
 
-
+// описывает логику диалогового окна для выбора периода времени
 public class DateRangeFragment extends DialogFragment implements DialogInterface.OnClickListener{
     DateFormat format;
     CalendarPickerView calendar;
@@ -60,13 +60,10 @@ public class DateRangeFragment extends DialogFragment implements DialogInterface
 
                 Date start = result.get(0);
                 Date end = result.get(result.size()-1);
-                Calendar cal = Calendar.getInstance();
-                cal.setTime(end);
-                cal.add(Calendar.DAY_OF_MONTH, 1);
 
                 Intent intent = new Intent();
                 intent.putExtra(Constants.KEY_DIALOG_RESULT_START, start.getTime());
-                intent.putExtra(Constants.KEY_DIALOG_RESULT_END, cal.getTime().getTime());
+                intent.putExtra(Constants.KEY_DIALOG_RESULT_END, end.getTime());
                 getTargetFragment().onActivityResult(getTargetRequestCode(), Activity.RESULT_OK, intent);
         }
     }

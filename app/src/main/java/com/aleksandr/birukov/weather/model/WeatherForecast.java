@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+// Используется для запросов с помощью Retrofit
+// по сути достает список объектов Weather
 public class WeatherForecast {
 
     @SerializedName("list")
@@ -36,7 +38,7 @@ public class WeatherForecast {
     }
 
     //Возвращает подробный прогноз на остаток дня
-    //shift - сдвиг ( 0 - текущий день, 1 - следующий.. )
+    //shift - сдвиг ( 0 - текущий день, 1 - следующий, 2 - через день.. )
     public List<Weather> getDailyForcast(int shift){
         List<Weather> temp = new ArrayList<>();
         int day_num = forecast.get(shift * 8).getDate().get(Calendar.DAY_OF_MONTH);

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+// Используется для запросов с помощью Retrofit
+// описывает погоду в конкретной точке времени
 public class Weather  {
 
     public Weather(double temp, double humidity, String icon, long time) {

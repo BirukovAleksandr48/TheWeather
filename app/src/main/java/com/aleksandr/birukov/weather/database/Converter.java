@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+// конвертирует объекты Weather -> WeatehrDB и обратно
 public class Converter {
     public static List<WeatherDB> convertForDB(List<Weather> weatherlist){
         ArrayList<WeatherDB> result = new ArrayList<>();

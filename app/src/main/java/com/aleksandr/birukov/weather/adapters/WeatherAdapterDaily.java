@@ -17,6 +17,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+// Адаптер для отображения подробного дневого прогноза погоды
 public class WeatherAdapterDaily extends BaseAdapter {
     private final Context mContext;
     private List<Weather> mForecast;

@@ -4,16 +4,15 @@ package com.aleksandr.birukov.weather.Fragments;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aleksandr.birukov.weather.Constants;
 import com.aleksandr.birukov.weather.R;
@@ -27,14 +26,9 @@ import com.anychart.anychart.AnyChartView;
 import com.anychart.anychart.Cartesian;
 import com.anychart.anychart.CartesianSeriesLine;
 import com.anychart.anychart.DataEntry;
-import com.anychart.anychart.EnumsAnchor;
 import com.anychart.anychart.Mapping;
-import com.anychart.anychart.MarkerType;
-import com.anychart.anychart.Pie;
 import com.anychart.anychart.Set;
 import com.anychart.anychart.Stroke;
-import com.anychart.anychart.Tooltip;
-import com.anychart.anychart.TooltipPositionMode;
 import com.anychart.anychart.ValueDataEntry;
 import com.savvi.rangedatepicker.CalendarPickerView;
 
@@ -45,11 +39,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import es.dmoral.toasty.Toasty;
 
+// отвечает за построение графика изменения температуры
 public class StatisticFragment extends Fragment {
     ImageButton btn;
     TextView tv;
-    CalendarPickerView calendar;
     DateFormat formatGraph, formatTextView;
     public static final int CODE_TIME_RANGE = 1;
     WeatherDao db;
@@ -81,6 +76,7 @@ public class StatisticFragment extends Fragment {
                 fragment.show(getFragmentManager(), fragment.getClass().getName());
             }
         });
+
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         spEditor = sharedPreferences.edit();
 
@@ -109,12 +105,17 @@ public class StatisticFragment extends Fragment {
         updateUI();
     }
 
-    public void updateUI(){
+    public void updateUI() {
+        if (cityName == null) {
+            Toasty.error(getActivity(), "Ошибка. Сначала выберите город",
+                    Toast.LENGTH_LONG, true).show();
+            return;
+        }
+
         tv.setText(cityName + "  " + formatTextView.format(new Date(start)) +
                 " - " + formatTextView.format(new Date(end)));
 
         List<Weather> data = mWeatherForecast.getForecast();
-
         Cartesian cartesian = AnyChart.line();
 
         cartesian.setAnimation(true);
@@ -124,9 +125,14 @@ public class StatisticFragment extends Fragment {
                 .setYStroke((Stroke) null, null, null, null, null);
         cartesian.getXAxis().getLabels().setPadding(5d, 5d, 20d, 5d);
 
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date(end));
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+        long temp = cal.getTimeInMillis();
+
         List<DataEntry> seriesData = new ArrayList<>();
         for (Weather w : data){
-            if(w.getTime()*1000 >= start && w.getTime()*1000 < end) {
+            if(w.getTime()*1000 >= start && w.getTime()*1000 < temp) {
                 seriesData.add(new ValueDataEntry(formatGraph.format(w.getDate().getTime()), w.getTemperature()));
             }
         }

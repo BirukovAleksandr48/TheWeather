@@ -16,7 +16,7 @@ import com.bumptech.glide.Glide;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.List;
-
+// адаптер для отображения недельного прогноза погоды
 public class WeatherAdapterWeekly extends BaseAdapter {
     private final Context mContext;
     private List<Weather> mForecast;

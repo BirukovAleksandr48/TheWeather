@@ -13,12 +13,12 @@ import com.aleksandr.birukov.weather.database.WeatherDao;
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-
+// Сюда вынесена логика, которая используется в разных частях программы,
+// чтобы избежать дублирования кода
 public class WeatherApplication extends Application{
 
     public static WeatherApplication instance;
 
-    //Для работы с БД
     private AppDatabase appdb;
     private WeatherDao database;
 
@@ -40,6 +40,7 @@ public class WeatherApplication extends Application{
         return database;
     }
 
+    //Получение названия города по координатам
     public static String getCityName(Context context, double lat, double lon){
         Geocoder gcd = new Geocoder(context, Locale.getDefault());
         List<Address> addresses = null;

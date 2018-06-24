@@ -4,11 +4,8 @@ package com.aleksandr.birukov.weather.Fragments;
 import android.app.Fragment;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.location.Address;
-import android.location.Geocoder;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,6 +14,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.aleksandr.birukov.weather.Constants;
 import com.aleksandr.birukov.weather.R;
@@ -24,11 +22,9 @@ import com.aleksandr.birukov.weather.WeatherApi;
 import com.aleksandr.birukov.weather.WeatherApplication;
 import com.aleksandr.birukov.weather.adapters.WeatherAdapterDaily;
 import com.aleksandr.birukov.weather.adapters.WeatherAdapterWeekly;
-import com.aleksandr.birukov.weather.database.AppDatabase;
 import com.aleksandr.birukov.weather.database.Converter;
 import com.aleksandr.birukov.weather.database.WeatherDB;
 import com.aleksandr.birukov.weather.database.WeatherDao;
-import com.aleksandr.birukov.weather.model.Weather;
 import com.aleksandr.birukov.weather.model.WeatherForecast;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -38,19 +34,14 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
-import com.google.android.gms.maps.model.LatLng;
 
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Locale;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+// отвечает за подробное отображение прогноза погоды на 120 часов
 public class ForecastFragment extends Fragment {
     WeatherApi.ApiInterface api;
     GridView gvForecastWeek, gvForecastDay;
@@ -122,7 +113,7 @@ public class ForecastFragment extends Fragment {
             }
         });
 
-        //sharedPreferences = getActivity().getPreferences(getActivity().MODE_PRIVATE);
+        //пытается достать данные о погоде с БД
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         spEditor = sharedPreferences.edit();
 
@@ -145,11 +136,12 @@ public class ForecastFragment extends Fragment {
             case PLACE_PICKER_REQUEST:
                 if (resultCode != getActivity().RESULT_OK)
                     return;
-
-                tvCurDay.setText("");
                 Place place = PlacePicker.getPlace(getActivity(), data);
                 updatePlace(place);
                 updateWeather();
+                if (cityName != null){
+                    autocompleteFragment.setText(cityName);
+                }
         }
     }
     public void updateWeather(){
@@ -160,7 +152,6 @@ public class ForecastFragment extends Fragment {
                 mWeatherForecast = response.body();
                 if (response.isSuccessful()) {
                     updateUI();
-                    gvForecastDay.setAdapter(null);
                     saveToDB();
                 }
             }
@@ -170,6 +161,15 @@ public class ForecastFragment extends Fragment {
 
             }
         });
+    }
+
+    public void updateUI(){
+        tvCurDay.setText(new SimpleDateFormat("EEEE, d.MM").
+                format(mWeatherForecast.getDailyForcast(0).get(0).getDate().getTime()));
+        gvForecastWeek.setAdapter(new WeatherAdapterWeekly(getActivity(),
+                mWeatherForecast.getWeeklyForcast()));
+        gvForecastDay.setAdapter(new WeatherAdapterDaily(
+                getActivity(), mWeatherForecast.getDailyForcast(0)));
     }
     public void saveToDB(){
         List<WeatherDB> weatherDBlist = Converter.convertForDB(mWeatherForecast.getForecast());
@@ -188,30 +188,12 @@ public class ForecastFragment extends Fragment {
                 .commit();
     }
 
-    public void updateUI(){
-        gvForecastWeek.setAdapter(new WeatherAdapterWeekly(getActivity(), mWeatherForecast.getWeeklyForcast()));
-    }
-
     public void updatePlace(Place place){
         lat = place.getLatLng().latitude;
         lon = place.getLatLng().longitude;
-
-        Geocoder gcd = new Geocoder(getActivity(), Locale.getDefault());
-        List<Address> addresses = null;
-        try {
-            Log.e("MyLog", "1");
-            addresses = gcd.getFromLocation(lat, lon, 1);
-            if (addresses.size() > 0) {
-                Log.e("MyLog", "2");
-                cityName =  addresses.get(0).getLocality();
-            }
-        } catch (IOException e) {
-            Log.e("MyLog", "3");
-            e.printStackTrace();
-        }
-        Log.e("MyLog", "4");
-        //cityName = WeatherApplication.getCityName(getActivity(), lat, lon);
+        cityName = WeatherApplication.getCityName(getActivity(), lat, lon);
     }
+
     public void log(String text){
         Log.e("MyLog", text);
     }

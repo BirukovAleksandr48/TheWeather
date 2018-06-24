@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+//Главное активити. Отвечает за показ необходимых фрагментов
 public class NavigationActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -41,17 +42,17 @@ public class NavigationActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.getMenu().getItem(0).setChecked(true);
 
+        // Изначально, при открытии программы, отображает ForecastFragment
         FragmentManager fragmentManager = getFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.container, new ForecastFragment()).commit();
+        setTitle("Прогноз");
 
+        // Запускает таймер сервиса уведомлений
         WeatherService.setServiceAlarm(this, true);
-
-
     }
 
     @Override
